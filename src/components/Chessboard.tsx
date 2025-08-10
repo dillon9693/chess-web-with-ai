@@ -20,22 +20,17 @@ const ChessboardComponent: React.FC<ChessboardComponentProps> = (props) => {
   const [status, setStatus] = useState<string>("");
 
   // Function to make a random computer move
-  const makeRandomMove = () => {
-    // Get all possible moves
-    const possibleMoves = game.moves();
-
+  const makeMove = () => {
     // If the game is over, do nothing
     if (game.isGameOver()) {
       setGameOver(true);
       return;
     }
 
-    // Choose a random move
-    const randomIndex = Math.floor(Math.random() * possibleMoves.length);
-    const move = possibleMoves[randomIndex];
+    const nextMove = getRandomMove(game);
 
     // Make the move
-    game.move(move);
+    game.move(nextMove);
 
     // Update the game state
     setChessPosition(game.fen());
@@ -62,7 +57,7 @@ const ChessboardComponent: React.FC<ChessboardComponentProps> = (props) => {
       setChessPosition(game.fen());
 
       // Make a computer move after a short delay
-      setTimeout(makeRandomMove, 300);
+      setTimeout(makeMove, 300);
 
       return true;
     } catch (error) {
@@ -138,3 +133,12 @@ const ChessboardComponent: React.FC<ChessboardComponentProps> = (props) => {
 };
 
 export default ChessboardComponent;
+
+
+function getRandomMove(game: Chess): string | null {
+  const possibleMoves = game.moves();
+  if (possibleMoves.length === 0) return null; // No moves available
+
+  const randomIndex = Math.floor(Math.random() * possibleMoves.length);
+  return possibleMoves[randomIndex];
+}

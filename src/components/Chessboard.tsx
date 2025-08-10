@@ -145,19 +145,25 @@ const ChessboardComponent: React.FC<ChessboardComponentProps> = (props) => {
   return (
     <div className="chessboard-container">
       <div className="game-status">{status}</div>
-      {errorMessage && (
-        <div className="error-message">
-          {errorMessage}
-        </div>
-      )}
-      {currentOpening && (
-        <div className="opening-info">
-          <span className="opening-name">{currentOpening.name}</span>
-          {currentOpening.description && (
-            <span className="opening-description">{currentOpening.description}</span>
-          )}
-        </div>
-      )}
+
+      {/* Status messages section */}
+      <div className="status-messages">
+        {errorMessage && (
+          <div className="error-message">
+            {errorMessage}
+          </div>
+        )}
+
+        {/* Only show opening info if there's no error message */}
+        {!errorMessage && currentOpening && (
+          <div className="opening-info">
+            <span className="opening-name">{currentOpening.name}</span>
+            {currentOpening.description && (
+              <span className="opening-description">{currentOpening.description}</span>
+            )}
+          </div>
+        )}
+      </div>
       <AISelector
         currentStrategy={aiStrategy}
         onStrategyChange={setAIStrategy}

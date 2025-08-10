@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Chessboard as ReactChessboard } from "react-chessboard";
 import { Chess } from "chess.js";
+import { AIStrategy, AIFactory } from "../ai";
+import AISelector from "./AISelector";
 import "./Chessboard.css";
 
 // Create a component with any props to bypass TypeScript checking
@@ -20,8 +22,9 @@ const ChessboardComponent: React.FC<ChessboardComponentProps> = (props) => {
   const [gameOver, setGameOver] = useState<boolean>(false);
   const [status, setStatus] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [aiStrategy, setAIStrategy] = useState<AIStrategy>(AIFactory.getDefaultStrategy());
 
-  // Function to make a random computer move
+  // Function to make a computer move using the selected AI strategy
   const makeMove = () => {
     // If the game is over, do nothing
     if (game.isGameOver()) {
@@ -29,13 +32,14 @@ const ChessboardComponent: React.FC<ChessboardComponentProps> = (props) => {
       return;
     }
 
-    const nextMove = getRandomMove(game);
+    const nextMove = aiStrategy.getMove(game);
 
     // Make the move
-    game.move(nextMove);
-
-    // Update the game state
-    setChessPosition(game.fen());
+    if (nextMove) {
+      game.move(nextMove);
+      // Update the game state
+      setChessPosition(game.fen());
+    }
   };
 
   // Function to handle piece movement by the player
@@ -132,6 +136,10 @@ const ChessboardComponent: React.FC<ChessboardComponentProps> = (props) => {
           {errorMessage}
         </div>
       )}
+      <AISelector
+        currentStrategy={aiStrategy}
+        onStrategyChange={setAIStrategy}
+      />
       <Chessboard options={chessboardOptions} />
       {gameOver && (
         <button
@@ -152,12 +160,3 @@ const ChessboardComponent: React.FC<ChessboardComponentProps> = (props) => {
 };
 
 export default ChessboardComponent;
-
-
-function getRandomMove(game: Chess): string | null {
-  const possibleMoves = game.moves();
-  if (possibleMoves.length === 0) return null; // No moves available
-
-  const randomIndex = Math.floor(Math.random() * possibleMoves.length);
-  return possibleMoves[randomIndex];
-}

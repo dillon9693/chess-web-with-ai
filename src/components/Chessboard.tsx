@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Chessboard as ReactChessboard } from "react-chessboard";
 import { Chess } from "chess.js";
+import "./Chessboard.css";
 
 // Create a component with any props to bypass TypeScript checking
 const Chessboard = ReactChessboard as any;
@@ -18,6 +19,7 @@ const ChessboardComponent: React.FC<ChessboardComponentProps> = (props) => {
   const [chessPosition, setChessPosition] = useState(game.fen());
   const [gameOver, setGameOver] = useState<boolean>(false);
   const [status, setStatus] = useState<string>("");
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
   // Function to make a random computer move
   const makeMove = () => {
@@ -56,13 +58,25 @@ const ChessboardComponent: React.FC<ChessboardComponentProps> = (props) => {
       // Update the game state with the new position
       setChessPosition(game.fen());
 
+      // Clear any error message when a valid move is made
+      if (errorMessage) {
+        setErrorMessage("");
+      }
+
       // Make a computer move after a short delay
       setTimeout(makeMove, 300);
 
       return true;
     } catch (error) {
-      // TODO add message indicating bad move
+      // Display error message to the user
+      setErrorMessage("Invalid move! Please try again.");
       console.error("Error making move:", error);
+
+      // Clear the error message after 3 seconds
+      setTimeout(() => {
+        setErrorMessage("");
+      }, 3000);
+
       return false;
     }
   };
@@ -113,6 +127,11 @@ const ChessboardComponent: React.FC<ChessboardComponentProps> = (props) => {
   return (
     <div className="chessboard-container">
       <div className="game-status">{status}</div>
+      {errorMessage && (
+        <div className="error-message">
+          {errorMessage}
+        </div>
+      )}
       <Chessboard options={chessboardOptions} />
       {gameOver && (
         <button

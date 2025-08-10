@@ -181,20 +181,21 @@ const ChessboardComponent: React.FC<ChessboardComponentProps> = (props) => {
         lastEvaluation={lastEvaluation}
         isVisible={showReasoning}
       />
-      {gameOver && (
-        <button
-          className="reset-button"
-          onClick={() => {
-            // Reset the game object
-            gameRef.current = new Chess();
-            // Update the position state
-            setChessPosition(gameRef.current.fen());
-            setGameOver(false);
-          }}
-        >
-          New Game
-        </button>
-      )}
+      <button
+        className="reset-button"
+        onClick={() => {
+          // Reset the game object
+          gameRef.current = new Chess();
+          // Update the position state
+          setChessPosition(gameRef.current.fen());
+          setGameOver(false);
+          setCurrentOpening(null);
+          setLastEvaluation(null);
+          setErrorMessage("");
+        }}
+      >
+        {gameOver ? "New Game" : "Reset Game"}
+      </button>
     </div>
   );
 };

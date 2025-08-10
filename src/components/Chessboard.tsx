@@ -2,7 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { Chessboard as ReactChessboard } from "react-chessboard";
 import { Chess } from "chess.js";
 import { AIStrategy, AIFactory } from "../ai";
+import { MoveEvaluation } from "../utils/evaluation";
 import AISelector from "./AISelector";
+import MoveReasoning from "./MoveReasoning";
 import "./Chessboard.css";
 
 // Create a component with any props to bypass TypeScript checking
@@ -23,6 +25,8 @@ const ChessboardComponent: React.FC<ChessboardComponentProps> = (props) => {
   const [status, setStatus] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [aiStrategy, setAIStrategy] = useState<AIStrategy>(AIFactory.getDefaultStrategy());
+  const [lastEvaluation, setLastEvaluation] = useState<MoveEvaluation | null>(null);
+  const [showReasoning, setShowReasoning] = useState<boolean>(false);
 
   // Function to make a computer move using the selected AI strategy
   const makeMove = () => {
@@ -32,7 +36,12 @@ const ChessboardComponent: React.FC<ChessboardComponentProps> = (props) => {
       return;
     }
 
+    // Get the next move from the AI strategy
     const nextMove = aiStrategy.getMove(game);
+
+    // Get the evaluation data from the AI strategy
+    const evaluation = aiStrategy.getLastEvaluation();
+    setLastEvaluation(evaluation);
 
     // Make the move
     if (nextMove) {
@@ -140,7 +149,19 @@ const ChessboardComponent: React.FC<ChessboardComponentProps> = (props) => {
         currentStrategy={aiStrategy}
         onStrategyChange={setAIStrategy}
       />
+      <div className="debug-controls">
+        <button
+          className="toggle-reasoning"
+          onClick={() => setShowReasoning(!showReasoning)}
+        >
+          {showReasoning ? "Hide AI Reasoning" : "Show AI Reasoning"}
+        </button>
+      </div>
       <Chessboard options={chessboardOptions} />
+      <MoveReasoning
+        lastEvaluation={lastEvaluation}
+        isVisible={showReasoning}
+      />
       {gameOver && (
         <button
           className="reset-button"

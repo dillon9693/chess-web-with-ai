@@ -7,6 +7,8 @@ import { evaluateMoves, MoveEvaluation } from "../utils/evaluation";
  * This AI considers material value, center control, piece development, and king safety
  */
 export class BasicHeuristicAI implements AIStrategy {
+  // Store the last evaluation for debugging
+  private lastEvaluation: MoveEvaluation | null = null;
   /**
    * Get the best move based on basic chess heuristics
    * @param game The current chess game instance
@@ -27,6 +29,9 @@ export class BasicHeuristicAI implements AIStrategy {
         `${m.move} (${m.score.toFixed(1)}) - ${m.reasons.join(", ")}`
       ));
 
+      // Store the best move evaluation for debugging
+      this.lastEvaluation = evaluatedMoves[0];
+
       return evaluatedMoves[0].move;
     }
 
@@ -41,5 +46,13 @@ export class BasicHeuristicAI implements AIStrategy {
    */
   getName(): string {
     return "Basic Heuristic";
+  }
+
+  /**
+   * Get the evaluation data for the last move
+   * @returns The detailed evaluation data or null if not available
+   */
+  getLastEvaluation(): MoveEvaluation | null {
+    return this.lastEvaluation;
   }
 }

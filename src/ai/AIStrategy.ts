@@ -1,4 +1,5 @@
 import { Chess } from "chess.js";
+import { MoveEvaluation } from "../utils/evaluation";
 
 /**
  * Interface for all chess AI strategies
@@ -17,4 +18,10 @@ export interface AIStrategy {
    * @returns The display name of the strategy
    */
   getName(): string;
+
+  /**
+   * Get the evaluation data for the last move (if available)
+   * @returns The evaluation data or null if not available
+   */
+  getLastEvaluation(): MoveEvaluation | null;
 }

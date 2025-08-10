@@ -3,6 +3,7 @@ import { Chessboard as ReactChessboard } from "react-chessboard";
 import { Chess } from "chess.js";
 import { AIStrategy, AIFactory } from "../ai";
 import { MoveEvaluation } from "../utils/evaluation";
+import { getOpeningInfo } from "../utils/openingBook";
 import AISelector from "./AISelector";
 import MoveReasoning from "./MoveReasoning";
 import "./Chessboard.css";
@@ -27,6 +28,7 @@ const ChessboardComponent: React.FC<ChessboardComponentProps> = (props) => {
   const [aiStrategy, setAIStrategy] = useState<AIStrategy>(AIFactory.getDefaultStrategy());
   const [lastEvaluation, setLastEvaluation] = useState<MoveEvaluation | null>(null);
   const [showReasoning, setShowReasoning] = useState<boolean>(false);
+  const [currentOpening, setCurrentOpening] = useState<{ name: string; description?: string } | null>(null);
 
   // Function to make a computer move using the selected AI strategy
   const makeMove = () => {
@@ -125,6 +127,9 @@ const ChessboardComponent: React.FC<ChessboardComponentProps> = (props) => {
     }
 
     setStatus(statusText);
+
+    // Update the current opening information
+    setCurrentOpening(getOpeningInfo(game));
   }, [chessPosition]); // Update when the position changes
 
   const chessboardOptions = {
@@ -143,6 +148,14 @@ const ChessboardComponent: React.FC<ChessboardComponentProps> = (props) => {
       {errorMessage && (
         <div className="error-message">
           {errorMessage}
+        </div>
+      )}
+      {currentOpening && (
+        <div className="opening-info">
+          <span className="opening-name">{currentOpening.name}</span>
+          {currentOpening.description && (
+            <span className="opening-description">{currentOpening.description}</span>
+          )}
         </div>
       )}
       <AISelector

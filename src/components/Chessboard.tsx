@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Chessboard as ReactChessboard } from 'react-chessboard';
 import { Chess } from 'chess.js';
 
@@ -14,10 +14,40 @@ interface ChessboardComponentProps {
 const ChessboardComponent: React.FC<ChessboardComponentProps> = ({ boardWidth = 500 }) => {
   // Initialize the chess instance with the starting position
   const [game, setGame] = useState<Chess>(new Chess());
+  const [gameOver, setGameOver] = useState<boolean>(false);
+  const [status, setStatus] = useState<string>('');
 
-  // Function to handle piece movement
+  // Function to make a random computer move
+  const makeRandomMove = () => {
+    // Get all possible moves
+    const possibleMoves = game.moves();
+
+    // If the game is over, do nothing
+    if (possibleMoves.length === 0 || game.isGameOver() || gameOver) {
+      setGameOver(true);
+      return;
+    }
+
+    // Choose a random move
+    const randomIndex = Math.floor(Math.random() * possibleMoves.length);
+    const move = possibleMoves[randomIndex];
+
+    // Make the move
+    game.move(move);
+
+    // Update the game state
+    setGame(new Chess(game.fen()));
+  };
+
+  // Function to handle piece movement by the player
   const onDrop = (sourceSquare: string, targetSquare: string) => {
     try {
+      // If the game is over, don't allow moves
+      if (gameOver || game.isGameOver()) {
+        setGameOver(true);
+        return false;
+      }
+
       // Attempt to make the move
       const move = game.move({
         from: sourceSquare,
@@ -31,14 +61,49 @@ const ChessboardComponent: React.FC<ChessboardComponentProps> = ({ boardWidth = 
       // Update the game state
       setGame(new Chess(game.fen()));
 
+      // Make a computer move after a short delay
+      setTimeout(makeRandomMove, 300);
+
       return true;
     } catch (error) {
       return false;
     }
   };
 
+  // Check for game over conditions and update status
+  useEffect(() => {
+    let statusText = '';
+
+    if (game.isGameOver()) {
+      setGameOver(true);
+
+      if (game.isCheckmate()) {
+        statusText = `Checkmate! ${game.turn() === 'w' ? 'Black' : 'White'} wins!`;
+      } else if (game.isDraw()) {
+        statusText = 'Game ended in a draw!';
+        if (game.isStalemate()) {
+          statusText = 'Game ended in stalemate!';
+        } else if (game.isThreefoldRepetition()) {
+          statusText = 'Game ended in draw by repetition!';
+        } else if (game.isInsufficientMaterial()) {
+          statusText = 'Game ended in draw due to insufficient material!';
+        }
+      }
+    } else {
+      // Game is ongoing
+      statusText = `${game.turn() === 'w' ? 'White' : 'Black'} to move`;
+
+      if (game.isCheck()) {
+        statusText += ' (Check!)';
+      }
+    }
+
+    setStatus(statusText);
+  }, [game]);
+
   return (
     <div className="chessboard-container">
+      <div className="game-status">{status}</div>
       <Chessboard
         boardWidth={boardWidth}
         position={game.fen()}
@@ -49,6 +114,17 @@ const ChessboardComponent: React.FC<ChessboardComponentProps> = ({ boardWidth = 
         }}
         // @ts-ignore - Ignoring TypeScript errors for Chessboard props
       />
+      {gameOver && (
+        <button
+          className="reset-button"
+          onClick={() => {
+            setGame(new Chess());
+            setGameOver(false);
+          }}
+        >
+          New Game
+        </button>
+      )}
     </div>
   );
 };

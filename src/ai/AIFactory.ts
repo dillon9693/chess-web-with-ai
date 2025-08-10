@@ -1,6 +1,7 @@
 import { AIStrategy } from "./AIStrategy";
 import { RandomAI } from "./RandomAI";
 import { BasicHeuristicAI } from "./BasicHeuristicAI";
+import { MinimaxAI } from "./MinimaxAI";
 
 /**
  * Factory class for creating AI strategy instances
@@ -14,7 +15,9 @@ export class AIFactory {
     return [
       new RandomAI(),
       new BasicHeuristicAI(),
-      // Add more strategies here as they are implemented
+      new MinimaxAI(2), // Depth 2 - Easy
+      new MinimaxAI(3), // Depth 3 - Medium
+      new MinimaxAI(4), // Depth 4 - Hard (might be slow on some devices)
     ];
   }
 
